@@ -92,7 +92,6 @@ jobs:
             && yarn set version stable \
             && yarn config set nodeLinker node-modules \
             && yarn install \
-            && yarn build \
             && yarn dist --config electron-builder-for-linux-arm64.yml
         "
 
