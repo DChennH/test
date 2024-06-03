@@ -87,6 +87,7 @@ jobs:
             python3 \
             make \
             g++ \
+            go \
             libc6-compat \
             libstdc++ \
             libgcc \
