@@ -1,0 +1,9 @@
+appId: "com.dxzn-src.oa"
+productName: "鼎小夏"
+artifactName: Dingxiaoxia_Setup_${version}_${arch}.${ext}
+linux:
+  icon: 'build/logo.png'
+  target: 
+    - target: snap
+      arch:
+        - arm64
