@@ -92,6 +92,12 @@ jobs:
             && yarn set version stable \
             && yarn config set nodeLinker node-modules \
             && yarn install \
+            && sudo apk add --no-cache --virtual .build-deps \
+                sudo \
+                snapd \
+            && sudo mkdir -p /var/lib/snapd/void \
+            && sudo mount --bind /var/lib/snapd/void /var/lib/snapd/snap \
+            && sudo snap install snapcraft --classic \
             && yarn dist --config electron-builder-for-linux-arm64.yml
         "
 
