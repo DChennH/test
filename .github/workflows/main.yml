@@ -80,9 +80,10 @@ jobs:
 
     - name: Run Docker container for build
       run: |
-        docker run --rm -v ${{ github.workspace }}:/project -w /project node:latest /bin/bash -c "
+        docker run --rm -v ${{ github.workspace }}:/project -w /project arm64v8/node:latest /bin/bash -c "
           apt-get update \
           && apt-get install -y snapd \
+          && service snapd start \
           && ln -s /var/lib/snapd/snap /snap \
           && snap install core \
           && snap install snapcraft --classic \
