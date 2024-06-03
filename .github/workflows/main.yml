@@ -75,28 +75,32 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Pull ARM64 Node.js image
-      run: docker pull arm64v8/node:20-alpine
+    - name: Pull ARM64 Ubuntu image
+      run: docker pull arm64v8/ubuntu:20.04
 
     - name: Run Docker container for build
       run: |
-        docker run --rm -v ${{ github.workspace }}:/project -w /project arm64v8/node:20-alpine /bin/sh -c "
-        apk add --no-cache \
-          git \
-          python3 \
-          make \
-          g++ \
-          libc6-compat \
-          && wget https://github.com/electron/electron/releases/download/v30.0.9/electron-v30.0.9-linux-arm64.zip \
-          && unzip electron-v30.0.9-linux-arm64.zip \
-          && npm install -g corepack \
-          && corepack enable \
-          && yarn set version stable \
-          && yarn config set nodeLinker node-modules \
-          && yarn install \
-          && yarn dist --config electron-builder-for-linux-arm64.yml
-        " 
-
+        docker run --rm -e DEBIAN_FRONTEND=noninteractive -v ${{ github.workspace }}:/project -w /project arm64v8/ubuntu:20.04 /bin/bash -c "
+          apt-get update \
+          && apt-get install -y \
+            git \
+            python3 \
+            make \
+            g++ \
+            snapd \
+            && ln -s /var/lib/snapd/snap /snap \
+            && systemctl enable --now snapd.socket \
+            && snap install core \
+            && snap install snapcraft --classic \
+            && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+            && apt-get install -y nodejs \
+            && npm install -g corepack \
+            && corepack enable \
+            && yarn set version stable \
+            && yarn config set nodeLinker node-modules \
+            && yarn install \
+            && yarn dist --config electron-builder-for-linux-arm64.yml
+        "
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
