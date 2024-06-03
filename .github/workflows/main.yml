@@ -75,32 +75,26 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Pull ARM64 Ubuntu image
-      run: docker pull arm64v8/ubuntu:20.04
+    - name: Pull ARM64 Node.js image
+      run: docker pull node:latest
 
     - name: Run Docker container for build
       run: |
-        docker run --rm -e DEBIAN_FRONTEND=noninteractive -v ${{ github.workspace }}:/project -w /project arm64v8/ubuntu:20.04 /bin/bash -c "
+        docker run --rm -v ${{ github.workspace }}:/project -w /project node:latest /bin/bash -c "
           apt-get update \
-          && apt-get install -y \
-            git \
-            python3 \
-            make \
-            g++ \
-            snapd \
-            && ln -s /var/lib/snapd/snap /snap \
-            && systemctl enable --now snapd.socket \
-            && snap install core \
-            && snap install snapcraft --classic \
-            && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-            && apt-get install -y nodejs \
-            && npm install -g corepack \
-            && corepack enable \
-            && yarn set version stable \
-            && yarn config set nodeLinker node-modules \
-            && yarn install \
-            && yarn dist --config electron-builder-for-linux-arm64.yml
+          && apt-get install -y snapd \
+          && systemctl enable --now snapd.socket \
+          && ln -s /var/lib/snapd/snap /snap \
+          && snap install core \
+          && snap install snapcraft --classic \
+          && npm install -g corepack \
+          && corepack enable \
+          && yarn set version stable \
+          && yarn config set nodeLinker node-modules \
+          && yarn install \
+          && yarn dist --config electron-builder-for-linux-arm64.yml
         "
+
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
