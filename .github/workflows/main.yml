@@ -87,12 +87,16 @@ jobs:
             make \
             g++ \
             libc6-compat \
+            snapd \
+            && mkdir -p /var/lib/snapd/snap \
+            && ln -s /var/lib/snapd/snap /snap \
+            && snap install core \
+            && snap install snapcraft --classic \
             && npm install -g corepack \
             && corepack enable \
             && yarn set version stable \
             && yarn config set nodeLinker node-modules \
             && yarn install \
-            && snap install snapcraft --classic \
             && yarn dist --config electron-builder-for-linux-arm64.yml
         "
 
