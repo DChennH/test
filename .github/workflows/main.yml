@@ -94,11 +94,13 @@ jobs:
             xz \
             sudo \
             shadow \
-            && wget https://github.com/snapcore/snapd/releases/download/2.58.2/snapd_2.58.2_arm64.apk \
-            && apk add --allow-untrusted snapd_2.58.2_arm64.apk \
-            && rm snapd_2.58.2_arm64.apk \
-            && systemctl enable --now snapd.socket \
+            && git clone --depth 1 --branch 2.58.2 https://github.com/snapcore/snapd /snapd \
+            && cd /snapd \
+            && ./mkversion.sh \
+            && ./build.sh \
+            && mkdir -p /var/lib/snapd/snap \
             && ln -s /var/lib/snapd/snap /snap \
+            && systemctl enable --now snapd.socket \
             && snap install core \
             && snap install snapcraft --classic \
             && npm install -g corepack \
