@@ -83,6 +83,7 @@ jobs:
           apt-get install -y snapd curl gnupg && \
           curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
           apt-get install -y nodejs && \
+          corepack enable && \
           npm install -g yarn && \
           yarn set version stable && \
           yarn config set nodeLinker node-modules && \
