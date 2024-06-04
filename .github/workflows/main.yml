@@ -67,24 +67,23 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Build and Package Electron App
+    - name: Install dependencies
       run: |
-        docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-        docker pull arm64v8/ubuntu:20.04
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace --privileged arm64v8/ubuntu:20.04 /bin/bash -c "
+        sudo apt-get update
+        sudo apt-get install -y lxd
+        sudo lxd init --auto
+
+    - name: Create and configure LXD container
+      run: |
+        sudo lxc launch ubuntu:20.04 arm64-container -c security.nesting=true
+        sudo lxc exec arm64-container -- /bin/bash -c "
           apt-get update && \
-          apt-get install -y snapd snapcraft fuse curl gnupg lsb-release && \
-          mkdir -p /var/lib/snapd && \
-          ln -s /var/lib/snapd/snap /snap && \
-          service snapd start && \
+          apt-get install -y snapd fuse curl gnupg lsb-release && \
+          systemctl enable snapd && \
+          systemctl start snapd && \
           sleep 10 && \
+          snap install core && \
+          snap install snapcraft --classic && \
           curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
           apt-get install -y nodejs && \
           corepack enable && \
@@ -92,10 +91,12 @@ jobs:
           yarn set version stable && \
           yarn config set nodeLinker node-modules && \
           yarn install && \
-          snap install core && \
-          snap install snapcraft --classic && \
           yarn dist && \
           snapcraft --destructive-mode"
+      
+    - name: Retrieve build artifacts
+      run: |
+        sudo lxc file pull arm64-container/workspace/*.snap .
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
