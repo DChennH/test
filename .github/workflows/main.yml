@@ -81,6 +81,8 @@ jobs:
         docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace --network host arm64v8/ubuntu:20.04 /bin/bash -c "
           apt-get update && \
           apt-get install -y snapd curl gnupg && \
+          systemctl enable snapd && \
+          systemctl start snapd && \
           curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
           apt-get install -y nodejs && \
           corepack enable && \
