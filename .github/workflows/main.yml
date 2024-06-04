@@ -78,14 +78,17 @@ jobs:
       run: |
         docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         docker pull arm64v8/ubuntu:20.04
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace --network host arm64v8/ubuntu:20.04 /bin/bash -c "
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace --privileged arm64v8/ubuntu:20.04 /bin/bash -c "
           apt-get update && \
-          apt-get install -y snapd curl gnupg && \
-          systemctl enable snapd && \
-          systemctl start snapd && \
+          apt-get install -y snapd snapcraft fuse curl gnupg lsb-release && \
+          mkdir -p /var/lib/snapd && \
+          ln -s /var/lib/snapd/snap /snap && \
+          service snapd start && \
+          sleep 10 && \
           curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
           apt-get install -y nodejs && \
           corepack enable && \
+          npm install -g yarn && \
           yarn set version stable && \
           yarn config set nodeLinker node-modules && \
           yarn install && \
