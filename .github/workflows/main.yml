@@ -74,23 +74,28 @@ jobs:
       id: buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Build ARM64 Snap
+    - name: Build and Package Electron App
       run: |
         docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         docker pull arm64v8/ubuntu:20.04
-        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace arm64v8/ubuntu:20.04 /bin/bash -c "
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace --network host arm64v8/ubuntu:20.04 /bin/bash -c "
           apt-get update && \
-          apt-get install -y snapcraft nodejs npm && \
+          apt-get install -y snapd curl gnupg && \
+          curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
+          apt-get install -y nodejs && \
           npm install -g yarn && \
           yarn set version stable && \
           yarn config set nodeLinker node-modules && \
           yarn install && \
+          snap install core && \
+          snap install snapcraft --classic && \
+          yarn dist && \
           snapcraft --destructive-mode"
-      
+
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/*.snap
+        files: '*.snap'
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v1.0.0
         name: 鼎小夏
