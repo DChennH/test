@@ -80,11 +80,15 @@ jobs:
       run: |
         sudo /snap/bin/lxd init --auto
 
+    - name: Set up proxy environment variables
+      run: |
+        export http_proxy=http://20.206.106.192:80
+        export https_proxy=http://104.21.8.246:80
+
     - name: Create and configure LXD container
       run: |
         sudo /snap/bin/lxc launch ubuntu:20.04 arm64-container -c security.nesting=true
         sudo /snap/bin/lxc exec arm64-container -- /bin/bash -c "
-          ping 8.8.8.8 && \
           apt-get update && \
           apt-get install -y snapd curl gnupg lsb-release && \
           systemctl enable snapd && \
