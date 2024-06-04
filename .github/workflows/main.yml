@@ -64,43 +64,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Check out repository
       uses: actions/checkout@v2
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: arm64
+      uses: docker/setup-qemu-action@v2
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      id: buildx
+      uses: docker/setup-buildx-action@v2
 
-    - name: Pull ARM64 Node.js image
-      run: docker pull node:latest
-
-    - name: Run Docker container for build
+    - name: Build ARM64 Snap
       run: |
-        docker run --rm -v ${{ github.workspace }}:/project -w /project arm64v8/node:latest /bin/bash -c "
-          apt-get update \
-          && apt-get install -y snapd \
-          && service snapd start \
-          && ln -s /var/lib/snapd/snap /snap \
-          && snap install core \
-          && snap install snapcraft --classic \
-          && npm install -g corepack \
-          && corepack enable \
-          && yarn set version stable \
-          && yarn config set nodeLinker node-modules \
-          && yarn install \
-          && yarn dist --config electron-builder-for-linux-arm64.yml
-        "
-
+        docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        docker pull arm64v8/ubuntu:20.04
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace arm64v8/ubuntu:20.04 /bin/bash -c "
+          apt-get update && \
+          apt-get install -y snapcraft nodejs npm && \
+          npm install -g yarn && \
+          yarn set version stable && \
+          yarn config set nodeLinker node-modules && \
+          yarn install && \
+          snapcraft --destructive-mode"
+      
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
         files: dist/*.snap
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: v1.0.0
-        name: Release v1.0.0
+        name: 鼎小夏
         draft: false
         prerelease: false
