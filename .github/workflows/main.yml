@@ -70,15 +70,22 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y lxd
-        sudo lxd init --auto
+        sudo apt-get install -y snapd
+
+    - name: Install LXD via Snap
+      run: |
+        sudo snap install lxd --channel=4.0/stable
+
+    - name: Initialize LXD
+      run: |
+        sudo /snap/bin/lxd init --auto
 
     - name: Create and configure LXD container
       run: |
-        sudo lxc launch ubuntu:20.04 arm64-container -c security.nesting=true
-        sudo lxc exec arm64-container -- /bin/bash -c "
+        sudo /snap/bin/lxc launch ubuntu:20.04 arm64-container -c security.nesting=true
+        sudo /snap/bin/lxc exec arm64-container -- /bin/bash -c "
           apt-get update && \
-          apt-get install -y snapd fuse curl gnupg lsb-release && \
+          apt-get install -y snapd curl gnupg lsb-release && \
           systemctl enable snapd && \
           systemctl start snapd && \
           sleep 10 && \
@@ -96,7 +103,7 @@ jobs:
       
     - name: Retrieve build artifacts
       run: |
-        sudo lxc file pull arm64-container/workspace/*.snap .
+        sudo /snap/bin/lxc file pull arm64-container/workspace/*.snap .
 
     - name: Upload to GitHub Release
       uses: softprops/action-gh-release@v1
