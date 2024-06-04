@@ -82,8 +82,8 @@ jobs:
 
     - name: Set up proxy environment variables
       run: |
-        export http_proxy=http://20.206.106.192:80
-        export https_proxy=http://104.21.8.246:80
+        export http_proxy=http://104.21.8.246:80
+        export https_proxy=http://20.206.106.192:80
 
     - name: Create and configure LXD container
       run: |
