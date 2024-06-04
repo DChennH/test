@@ -84,7 +84,7 @@ jobs:
       run: |
         sudo /snap/bin/lxc launch ubuntu:20.04 arm64-container -c security.nesting=true
         sudo /snap/bin/lxc exec arm64-container -- /bin/bash -c "
-          ping google.com && \
+          ping 8.8.8.8 && \
           apt-get update && \
           apt-get install -y snapd curl gnupg lsb-release && \
           systemctl enable snapd && \
